@@ -1,0 +1,118 @@
+
+You said:
+necesito reorientar el proyecto byDebut: con preguntas adecuadas,  la aplicacion encontrara y brinadara tres opciones de libros best sellers, o novelas de autores reconocidos de parrafos, paginas o capitulos que el usuario representara a traves de videos que luego seran publicadas en youtube, para ser evaluadas por el publico en el canal asociado a la aplicacion. La idea es que la aplicacion 
+
+
+
+
+
+Perfecto — lo que describes ya no es “solo recomendaciones de lectura”: es un **pipeline de creación + distribución + validación pública** (tipo “audición creativa”) donde el libro es el guion base, el usuario crea el video, y YouTube + la audiencia se vuelven el jurado.
+
+Aquí tienes una reorientación clara (producto + flujo + preguntas + reglas) para que byDebut quede sólido y fácil de construir.
+
+## 1) Nueva propuesta de valor (byDebut)
+
+**byDebut = Descubre una escena perfecta para ti (de un bestseller o autor reconocido), interprétala en video, publícala, y deja que el público la califique.**
+Con eso logras:
+
+* enganchar a lectores + creadores,
+* generar contenido constante,
+* y tener feedback real (métricas de YouTube + votaciones dentro de la app).
+
+## 2) Flujo del producto (MVP)
+
+1. **Onboarding de 90 segundos** (preguntas cortas)
+2. La app genera **3 opciones** (cada una con: libro + fragmento sugerido + “por qué encaja contigo” + dificultad + advertencias)
+3. El usuario elige 1 opción
+4. La app entrega un **“paquete de interpretación”**:
+
+   * contexto mínimo (sin spoilers)
+   * personajes + intención emocional
+   * guía de actuación (tono, ritmo, energía)
+   * sugerencias visuales/sonoras
+   * “guion de 45–90 segundos” (adaptación tipo escena)
+5. Grabación + edición (dentro o fuera de la app)
+6. Publicación en YouTube (en el canal asociado o vía OAuth)
+7. La app trae métricas / votos y arma un **score público** (engagement + votación + retención)
+
+## 3) Las preguntas adecuadas (para que las 3 opciones sean MUY acertadas)
+
+Tu objetivo no es “qué te gusta leer”, sino: **qué puedes interpretar bien en video**.
+
+### A. Estilo de interpretación (elige 1–2)
+
+* ¿Qué te sale mejor?
+  **(Comedia / Drama / Suspenso / Romance / Inspiracional / Acción / Reflexivo)**
+* ¿Qué tipo de escena quieres actuar?
+  **(Monólogo / Diálogo / Narración / Voz en off / Roleplay con 2+ personas)**
+
+### B. Intensidad y límites
+
+* ¿Qué tan intenso lo quieres?
+  **(Ligero / Medio / Fuerte)**
+* ¿Quieres evitar algo?
+  **(Violencia explícita / temas sexuales / religión / política / suicidio / drogas / terror, etc.)**
+
+### C. Formato del video
+
+* ¿Tu video será…?
+  **(Short vertical 30–60s / Video 1–3 min / escena más larga 3–6 min)**
+* ¿Qué recursos tienes?
+  **(Solo tú / 2 personas / props básicos / locación exterior / cero producción)**
+
+### D. Idioma y público
+
+* ¿En qué idioma actuarás? **(Español / Inglés / mezcla)**
+* ¿Tu público es…? **(LatAm / USA / global)**
+
+### E. “Vibe” del personaje
+
+* ¿Qué personaje te gustaría ser hoy?
+  **(Héroe / Anti-héroe / Villano carismático / Narrador sabio / Rebelde / Romántico, etc.)**
+
+Con esas 10–12 respuestas, el matching puede ser brutalmente preciso.
+
+## 4) Cómo deben verse las “3 opciones” en pantalla (formato ideal)
+
+Cada tarjeta debería traer:
+
+* **Libro + Autor (reconocido/bestseller)**
+* **Tipo de escena**: monólogo / diálogo / narración
+* **Duración sugerida**: 45–90s
+* **Dificultad**: Fácil / Media / Alta (por emoción, lenguaje, ritmo)
+* **“Por qué encaja contigo”** (2 bullets basados en sus respuestas)
+* **Riesgos/alertas** (tema sensible o lenguaje fuerte)
+* **CTA**: “Elegir esta escena”
+
+## 5) Regla crítica: copyright (para que no te tumben videos ni la app)
+
+Tu modelo depende de fragmentos de libros → ahí hay riesgo real.
+
+Para que byDebut sea viable:
+
+* La app debe trabajar con **“adaptaciones”** (escena inspirada) y no “leer páginas enteras”.
+* Entregar **un guion original** basado en el fragmento (paráfrasis + reinterpretación), manteniendo la esencia, evitando texto literal extenso.
+* Limitar: **nada de copiar capítulos completos**.
+* Si usas citas, que sean **muy breves** y justificadas.
+
+Si lo haces así, reduces muchísimo el riesgo de strikes y bloqueos.
+
+## 6) MVP que yo construiría contigo (simple y demoable)
+
+* Banco curado de ~50 libros/autores reconocidos (con tags por tono/tema/dificultad)
+* Motor de matching (reglas + scoring)
+* Generación del “paquete de interpretación”
+* Botón “Publicar” (aunque sea link/manual al inicio)
+* Ranking semanal y “Top performers”
+
+## 7) Tu frase que quedó incompleta (“La idea es que la aplicación…”)
+
+Te la completo como statement de producto (lista para pitch):
+
+> “La idea es que la aplicación, mediante preguntas cortas y precisas, seleccione tres escenas ideales de libros bestseller o autores reconocidos, genere una adaptación lista para interpretar en video, y publique esos videos en el canal de YouTube asociado para que el público los evalúe, creando un sistema continuo de descubrimiento, creación y validación social.”
+
+Si quieres, en el próximo mensaje te entrego:
+
+* **Un PRD** (requirements) estilo hackathon,
+* el **algoritmo de scoring** para elegir las 3 opciones,
+* y un **script de demo de 90 segundos** mostrando el flujo completo.

@@ -1,0 +1,280 @@
+The technical architecture aligned specifically to Gemini ADK
+
+Below is a **Gemini ADK–aligned technical architecture** for byDebut (Creative Storyteller pillar). It’s structured exactly how judges expect: clear components, agent boundaries, data flows, and what runs on Google Cloud.
+
+---
+
+# byDebut — Gemini ADK Technical Architecture (Creative Storyteller)
+
+## 1) High-level system goals
+
+* Collect a short “creator profile” via questions.
+* Retrieve candidate scenes (curated + community + unpublished).
+* Score and select **Top 3** scenes.
+* Generate an **Interleaved Creative Pack** (script + direction + storyboard + SEO package) using **Gemini via ADK**.
+* Publish / link to YouTube and capture performance signals for continuous improvement.
+
+---
+
+## 2) Core components (Google Cloud + ADK)
+
+### A) Frontend (Web)
+
+* **Next.js / React** UI
+* Modules:
+
+  * onboarding questions
+  * “3 scene cards” selection screen
+  * Creative Pack viewer (interleaved)
+  * publish workflow (YouTube link/OAuth later)
+  * rating + feedback
+
+**Output of frontend →** `CreatorProfile` + constraints + goal mode (viral/discovery/casting)
+
+---
+
+### B) API Gateway
+
+* **Cloud Run** REST API (or Firebase Functions if you prefer)
+* Endpoints:
+
+  * `POST /profile`
+  * `POST /recommendations`
+  * `POST /generate-pack`
+  * `POST /submit-scene` (community)
+  * `POST /submit-unpublished` (author portal)
+  * `POST /feedback`
+  * `POST /youtube/webhook` (optional)
+
+---
+
+### C) Data Layer (3 stores)
+
+Use the simplest combo that still looks “real”:
+
+1. **Firestore** (fast iteration)
+
+   * `users`
+   * `creator_profiles`
+   * `ratings`
+   * `submissions`
+   * `reputation`
+
+2. **Cloud Storage** (media & artifacts)
+
+   * user uploaded scripts or video drafts
+   * generated storyboard images (if any)
+   * exported creative packs (PDF/JSON)
+
+3. **Vector store** (for semantic retrieval)
+
+   * **Vertex AI Vector Search** (recommended)
+   * store embeddings for `scene_text`, `theme`, `emotion`, `style`
+
+---
+
+## 3) Gemini ADK Agent Design (the heart of the architecture)
+
+You will implement **one orchestrator agent** plus specialized “tools” (functions) that ADK can call. This is the cleanest way to present ADK usage.
+
+### A) Orchestrator: `byDebutCreativeDirectorAgent` (ADK)
+
+Responsible for:
+
+* calling retrieval/scoring tools
+* selecting top 3
+* generating the final interleaved output
+
+**Inputs**
+
+* `CreatorProfile` (answers, preferences, constraints)
+* `GoalMode` (viral/discovery/casting)
+* optional: `YouTubeChannelContext` (niche, audience language)
+
+**Outputs**
+
+* `Top3SceneOptions`
+* `CreativePack` (interleaved response bundle)
+* metadata for UI rendering (sections, assets)
+
+---
+
+### B) ADK Tools (function calling)
+
+These are deterministic services exposed by your Cloud Run API and registered as tools in ADK.
+
+#### Tool 1: `retrieve_candidate_scenes(profile)`
+
+* Pulls from:
+
+  * curated catalog (Firestore or SQL)
+  * community submissions
+  * unpublished catalog (author uploads)
+* Uses filters + embedding similarity search (Vector Search)
+* Returns top N candidates with tags & risk flags
+
+#### Tool 2: `score_and_rank_scenes(profile, candidates)`
+
+* Implements your scoring equation:
+
+  * Fit + Perf + Discovery − Risk + Quality
+* Applies hard filters (topics blocked, language mismatch, etc.)
+* Returns ranked list + “explainability bullets” for each scene
+
+#### Tool 3: `generate_adaptation(scene, profile)`
+
+* Produces a short **original adaptation** (avoid literal copying)
+* Returns:
+
+  * `script_45_90s`
+  * “performance notes”
+  * “content warnings”
+
+#### Tool 4: `generate_interleaved_creative_pack(scene, profile, script)`
+
+This is where you win the Creative Storyteller pillar.
+
+Returns a structured bundle:
+
+* Title hooks (A/B)
+* Script (final)
+* Character motivations
+* Emotional beats timeline
+* Shot list (5–8 shots)
+* Props / wardrobe suggestions
+* Audio mood
+* Thumbnail concept
+* YouTube SEO pack:
+
+  * description
+  * tags
+  * hashtags
+  * pinned comment prompt
+* Optional: storyboard frames (images)
+
+#### Tool 5: `log_outcomes(feedback | youtube_metrics)`
+
+* Stores:
+
+  * user rating
+  * publish success
+  * YouTube performance signals
+* Updates:
+
+  * scene priors
+  * proposer reputation
+  * long-tail exposure balancing
+
+---
+
+## 4) Interleaved Output (what judges want to see)
+
+In your UI, render the “Creative Pack” as a multi-section stream.
+
+**Interleaved pattern example:**
+
+1. Short hook paragraph (text)
+2. Inline storyboard frame (image) *(optional)*
+3. Script block (text)
+4. Shot list bullets (text)
+5. Thumbnail concept (text + image prompt)
+6. YouTube description + hashtags (text)
+
+Even if you don’t generate real images during the hackathon, you can:
+
+* include **image prompts** + “preview tiles”
+* optionally generate 1–2 images using Imagen / Gemini image capabilities if available
+
+The key is the **single cohesive stream** and clear multimodal structure.
+
+---
+
+## 5) Cloud deployment (must “live on Google Cloud”)
+
+Minimum credible deployment:
+
+* **Cloud Run**
+
+  * `api-service` (REST)
+  * `adk-agent-service` (if separated)
+* **Firestore**
+* **Cloud Storage**
+* **Vertex AI**
+
+  * Gemini model access
+  * Vector Search index
+
+Optional:
+
+* **Cloud Scheduler** + **Pub/Sub**
+
+  * nightly recalculation of priors / reputation
+* **Secret Manager**
+
+  * YouTube OAuth secrets
+* **Cloud Logging** + Error Reporting
+
+---
+
+## 6) Data flow (end-to-end)
+
+1. User completes onboarding in web UI
+2. UI → `POST /recommendations`
+3. API calls Vector Search + Firestore → candidate scenes
+4. Scoring service ranks and returns Top 3
+5. User picks one scene
+6. UI → `POST /generate-pack`
+7. ADK Orchestrator calls:
+
+   * retrieve (optional re-check)
+   * generate_adaptation
+   * generate_interleaved_creative_pack
+8. UI renders Creative Pack
+9. User publishes to YouTube (manual link or OAuth)
+10. UI sends rating + metrics → `POST /feedback`
+11. System updates priors + reputation
+
+---
+
+## 7) Safety & copyright handling (architecture-level)
+
+This matters a lot for judges.
+
+* Store **source text** for retrieval only (internal).
+* Creative Pack uses **adaptation generation**:
+
+  * paraphrase + reinterpretation
+  * short excerpts only
+* Add `copyright_risk_score` gates in `score_and_rank`.
+* Community + unpublished submissions require:
+
+  * checkbox license/permission
+  * reputation + moderation queue
+
+---
+
+## 8) Minimal hackathon build (what I’d implement first)
+
+To be fully ADK-aligned and demoable:
+
+✅ ADK Orchestrator + Tool calling
+✅ Vector retrieval (even small index)
+✅ Scoring engine (deterministic)
+✅ Interleaved Creative Pack generation
+✅ Cloud Run deployment
+✅ Firestore scene catalog + submissions
+✅ Basic feedback loop (rating)
+
+Optional upgrades if time:
+
+* Thumbnail image generation
+* YouTube OAuth publish
+* “unpublished author portal”
+
+---
+
+If you want, I can now produce:
+
+* the **exact ADK agent spec** (tools schema + prompts + JSON outputs)
+* a **Cloud Run service layout** (folders + endpoints)
+* a **demo-mode** that works without YouTube credentials (judge-friendly)
